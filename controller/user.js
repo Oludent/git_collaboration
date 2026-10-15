@@ -15,12 +15,13 @@ const saveToDb = (string) => {
 }
 
 const createProduct = async (req, res) => {
-    const {productName, quantity, price, availability} = req.body
+    const id = database.length + 1;
+    const {productName, quantity, price$, availability} = req.body
     const product = {
-        id: database.length + 1,
+        id,
         productName,
         quantity,
-        price,
+        price$,
         availability
     }
 
@@ -29,22 +30,22 @@ const createProduct = async (req, res) => {
     await saveToDb(JSON.stringify(database, null, 2))
 
     res.status(201).json({
-        message: 'Product created',
+        message: 'Product created!',
         data: product
     })
 }
 
 const checkProducts = (req, res) => {
-    const products = database
+    const products = database;
     res.status(200).json({
-        massage: `All availabily products are of ${database.length}`,
+        massage: `All availabile products are of ${database.length}`,
         data: products
     })
 }
 
 const checkSingleProduct = (req, res)=>{
-    const id = req.body.params
-    const product = database.find((id) => id == id)
+    const id = req.params.id;
+    const product = database.find((product) => product.id == id)
     if (product == null){
         return res.status(404).json({
             massage:`Product doesn't exist`
@@ -58,14 +59,19 @@ const checkSingleProduct = (req, res)=>{
 }
 
 const updateProduct = async (req, res)=>{
-    const id = req.body.params;
-    const{productName, quantity, price, availability} = req.body
-    const product = database.find((id)=> id == id)
+    const id = req.params.id;
+    const{productName, quantity, price$, availability} = req.body
+    const product = database.find((product) => product.id == id)
     if (product == null){
-        return res.status(404).json({massage: `Product cannot  be updated!`})
+        return res.status(404).json({
+            massage: `Product cannot  be updated!`})
     }
 
-    product.productName == 
+product.productName = productName || product.productName;
+product.quantity = quantity || product.quantity;
+product.price$ = price$ || product.price$;
+product.availability = availability || product.availability;
+
 await saveToDb(JSON.stringify(database, null, 2));
 
 res.status(201).json({
@@ -74,8 +80,25 @@ res.status(201).json({
 })
 }
 
+ const deleteProduct =async (req, res)=>{
+    const id = req.params.id;
+    const prod = database.findIndex((product)=> product.id == id);
+
+    database.splice(prod, 1)
+
+
+await saveToDb(JSON.stringify(database, null, 2))
+
+res.status(200).json({
+    massage: `Product deleted successfully!`,
+    data: prod
+})
+ };
+
 module.exports = {
     createProduct,
     checkProducts,
     checkSingleProduct,
+    updateProduct,
+    deleteProduct
 }
